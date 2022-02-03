@@ -1,5 +1,5 @@
 this is an example file which contains CJK and KANGXI radicals and strokes, which will be replaced with
 their CJK UNIFIED equivalents.
 
-a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉
+a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉h王
 
