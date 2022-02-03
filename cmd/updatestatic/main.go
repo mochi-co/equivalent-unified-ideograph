@@ -1,9 +1,9 @@
 package main
 
 /*
-	Refresh the static.go file with the latest equivalent  pairs from an
+	Refresh the static.go file with the latest equivalent pairs from an
  	EquivalentUnifiedIdeograph.txt file. Run this command from the root
-	of the repo:` `go run cmd/updatestatic/main.go``
+	of the project: `go run cmd/updatestatic/main.go``
 */
 
 import (
