@@ -20,10 +20,10 @@ type EquivalentPair struct {
 
 // Replace iterates through the runes ofa string and replaces them with
 // their CJK Unified Equivalents if applicable.
-func Replace(s string, replaceUnique bool) []byte {
+func Replace(s string) []byte {
 	n := []byte{}
 	for _, r := range s {
-		if v, ok := MappedPairs[string(r)]; ok && (replaceUnique || !Unique[string(r)]) {
+		if v, ok := MappedPairs[string(r)]; ok {
 			n = append(n, []byte(v)...)
 			continue
 		}
@@ -35,7 +35,7 @@ func Replace(s string, replaceUnique bool) []byte {
 
 // BufferedReplace iterates through the runes of an io.Reader and replaces
 // them with their CJK Unified Equivalents if applicable.
-func BufferedReplace(r io.Reader, replaceUnique bool) (out *bytes.Buffer, replaced map[string]int, err error) {
+func BufferedReplace(r io.Reader) (out *bytes.Buffer, replaced map[string]int, err error) {
 	replaced = map[string]int{}
 	out = bytes.NewBuffer([]byte{})
 
@@ -43,7 +43,7 @@ func BufferedReplace(r io.Reader, replaceUnique bool) (out *bytes.Buffer, replac
 	s.Split(bufio.ScanRunes)
 	for s.Scan() {
 		rn := s.Text()
-		if v, ok := MappedPairs[rn]; ok && (replaceUnique || !Unique[rn]) {
+		if v, ok := MappedPairs[rn]; ok {
 			out.WriteString(v)
 			replaced[rn+","+v] = replaced[rn+","+v] + 1
 			continue

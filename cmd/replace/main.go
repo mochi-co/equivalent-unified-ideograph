@@ -1,7 +1,13 @@
 package main
 
+/*
+	Replace all variant instances in a file with their equivalent unified characters.
+	Run this command: `go run cmd/replace/main.go``
+*/
+
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,9 +32,14 @@ func main() {
 		log.Fatalln("couldn't open the input file", err)
 	}
 
-	d, err := eqi.BufferedReplace(file)
+	d, replaced, err := eqi.BufferedReplace(file)
 	if err != nil {
 		log.Fatalln("couldn't replace characters", err)
+	}
+
+	totalReplaced := 0
+	for _, v := range replaced {
+		totalReplaced += v
 	}
 
 	if *output == "-" {
@@ -39,4 +50,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	for k, v := range replaced {
+		fmt.Println(k, ":", v)
+	}
+	fmt.Printf("replaced %d characters in %s with data from %s", totalReplaced, *output, *input)
+
 }
