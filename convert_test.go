@@ -1,6 +1,7 @@
 package eqi
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -8,14 +9,51 @@ import (
 )
 
 func TestBufferedReplace(t *testing.T) {
-	b := strings.NewReader(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`)
-	o, err := BufferedReplace(b)
+	wantMap := map[string]int{
+		"⺁,厂": 1,
+		"⺄,乙": 1,
+		"⺅,亻": 1,
+		"⺆,冂": 1,
+		"⺇,𠘨": 1,
+		"⺭,礻": 1,
+		"⺶,羊": 1,
+	}
+
+	b := strings.NewReader(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼h⺩`)
+	o, replaced, err := BufferedReplace(b, false)
 	require.NoError(t, err)
-	require.Equal(t, `a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉`, string(o.Bytes()))
+	require.Equal(t, true, reflect.DeepEqual(wantMap, replaced))
+	require.Equal(t, `a厂b乙c亻d冂e𠘨f⺩g⺫h礻i羊j⺼h⺩`, string(o.Bytes()))
+}
+
+func TestBufferedReplaceVisuallyUnique(t *testing.T) {
+	wantMap := map[string]int{
+		"⺁,厂": 1,
+		"⺄,乙": 1,
+		"⺅,亻": 1,
+		"⺆,冂": 1,
+		"⺇,𠘨": 1,
+		"⺩,王": 2,
+		"⺫,目": 1,
+		"⺭,礻": 1,
+		"⺶,羊": 1,
+		"⺼,肉": 1,
+	}
+
+	b := strings.NewReader(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼h⺩`)
+	o, replaced, err := BufferedReplace(b, true)
+	require.NoError(t, err)
+	require.Equal(t, true, reflect.DeepEqual(wantMap, replaced))
+	require.Equal(t, `a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉h王`, string(o.Bytes()))
 }
 
 func TestReplace(t *testing.T) {
-	o := Replace(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`)
+	o := Replace(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`, false)
+	require.Equal(t, `a厂b乙c亻d冂e𠘨f⺩g⺫h礻i羊j⺼`, string(o))
+}
+
+func TestReplaceVisuallyUnique(t *testing.T) {
+	o := Replace(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`, true)
 	require.Equal(t, `a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉`, string(o))
 }
 
