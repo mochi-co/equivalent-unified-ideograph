@@ -2,6 +2,7 @@ package eqi
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -15,6 +16,51 @@ type EquivalentPair struct {
 	VariantName string
 	Variant     string
 	Unified     string
+}
+
+// Replace iterates through the runes ofa string and replaces them with
+// their CJK Unified Equivalents if applicable.
+func Replace(s string) []byte {
+	n := []byte{}
+	for _, r := range s {
+		if v, ok := MappedPairs[string(r)]; ok {
+			n = append(n, []byte(v)...)
+			continue
+		}
+		n = append(n, []byte(string(r))...)
+	}
+
+	return n
+}
+
+// BufferedReplace iterates through the runes of an io.Reader and replaces
+// them with their CJK Unified Equivalents if applicable.
+func BufferedReplace(r io.Reader) (out *bytes.Buffer, err error) {
+	out = bytes.NewBuffer([]byte{})
+
+	s := bufio.NewScanner(r)
+	s.Split(bufio.ScanRunes)
+	for s.Scan() {
+		rn := s.Text()
+		if v, ok := MappedPairs[string(rn)]; ok {
+			out.WriteString(v)
+			continue
+		}
+		out.WriteString(rn)
+	}
+
+	return out, nil
+}
+
+// MapPairs returns the pairs in a map, keyed on variant with the
+// unified character as the value.
+func MapPairs(pairs []EquivalentPair) map[string]string {
+	m := map[string]string{}
+	for _, v := range pairs {
+		m[v.Variant] = v.Unified
+	}
+
+	return m
 }
 
 // ExtractPairs extracts the unicode pairs from an io.Reader to a properly
