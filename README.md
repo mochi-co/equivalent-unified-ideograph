@@ -16,12 +16,7 @@ The purpose of this library is mainly to deal with inconsistent character encodi
 
 In the above case, you may have one dataset which uses `CJK RADICAL GRASS ONE` characters, and another which uses `CJK RADICAL GRASS TWO`, and these will not match. We can solve this problem by converting the "variant" ideographs to their CJK Unified Ideograph equivalents across all datasets.
 
-### Visually Unique Equivalents
-
-
-
 ### Usage
-
 #### File Transformation
 The `cmd/replace/main.go` file can be used to replace all the listed variants in a file with their equivalent unified ideographs. This should be run from the root of the project:
 
