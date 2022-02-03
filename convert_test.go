@@ -22,75 +22,101 @@ func TestExtractPairs(t *testing.T) {
 	pairs, err := ExtractPairs(b)
 	require.NoError(t, err)
 	require.Equal(t, []EquivalentPair{
-		{Variant: "⺁", Unified: "厂"},
-		{Variant: "⺂", Unified: "乛"},
-		{Variant: "⻌", Unified: "辶"},
-		{Variant: "⻍", Unified: "辶"},
-		{Variant: "⻎", Unified: "辶"},
-		{Variant: "⺃", Unified: "乚"},
-		{Variant: "⺾", Unified: "艹"},
-		{Variant: "⺿", Unified: "艹"},
-		{Variant: "⻀", Unified: "艹"},
-		{Variant: "㇡", Unified: "𠄎"},
+		{Variant: "⺁", Unified: "厂", VariantName: "CJK RADICAL CLIFF"},
+		{Variant: "⺂", Unified: "乛", VariantName: "CJK RADICAL SECOND ONE"},
+		{Variant: "⻌", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⻍", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⻎", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⺃", Unified: "乚", VariantName: "CJK RADICAL SECOND TWO"},
+		{Variant: "⺾", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "⺿", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "⻀", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "㇡", Unified: "𠄎", VariantName: "CJK STROKE HZZZG"},
 	}, pairs)
 }
 
 func TestTargetsFromLine(t *testing.T) {
 	tt := []struct {
-		have string
-		t0   string
-		t1   string
+		have        string
+		variantName string
+		variant     string
+		unified     string
 	}{
 		{
-			have: `2E81       ; 5382  #     CJK RADICAL CLIFF`, t0: `2E81`, t1: `5382`,
+			have:        `2E81       ; 5382  #     CJK RADICAL CLIFF`,
+			variantName: "CJK RADICAL CLIFF",
+			variant:     `2E81`,
+			unified:     `5382`,
 		}, {
-			have: `2E87       ; 20628 #     CJK RADICAL TABLE`, t0: `2E87`, t1: `20628`,
+			have:        `2E87       ; 20628 #     CJK RADICAL TABLE`,
+			variantName: "CJK RADICAL TABLE",
+			variant:     `2E87`,
+			unified:     `20628`,
 		}, {
-			have: `31E1       ; 2010E #     CJK STROKE HZZZG`, t0: `31E1`, t1: `2010E`,
+			have:        `31E1       ; 2010E #     CJK STROKE HZZZG`,
+			variantName: "CJK STROKE HZZZG",
+			variant:     `31E1`,
+			unified:     `2010E`,
 		}, {
-			have: `31D2..31D3 ; 4E3F  # [2] CJK STROKE P..CJK STROKE SP`, t0: `31D2..31D3`, t1: `4E3F`,
+			have:        `31D2..31D3 ; 4E3F  # [2] CJK STROKE P..CJK STROKE SP`,
+			variantName: "[2] CJK STROKE P..CJK STROKE SP",
+			variant:     `31D2..31D3`,
+			unified:     `4E3F`,
 		}, {
-			have: `2ECC..2ECE ; 8FB6  # [3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO`, t0: `2ECC..2ECE`, t1: `8FB6`,
+			have:        `2ECC..2ECE ; 8FB6  # [3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO`,
+			variantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO",
+			variant:     `2ECC..2ECE`,
+			unified:     `8FB6`,
 		},
 	}
 
 	for _, c := range tt {
-		t0, t1 := targetsFromLine(c.have)
-		require.Equal(t, c.t0, t0)
-		require.Equal(t, c.t1, t1)
+		variant, unified, name := targetsFromLine(c.have)
+		require.Equal(t, c.variant, variant)
+		require.Equal(t, c.unified, unified)
+		require.Equal(t, c.variantName, name)
 	}
 }
 
 func TestPairsFromTargets(t *testing.T) {
 	tt := []struct {
-		variant string
-		unified string
-		pairs   []EquivalentPair
+		variantName string
+		variant     string
+		unified     string
+		pairs       []EquivalentPair
 	}{
 		{
-			variant: `2E81`,
-			unified: `5382`,
-			pairs:   []EquivalentPair{{"⺁", "厂"}},
+			variantName: "CJK RADICAL CLIFF",
+			variant:     `2E81`,
+			unified:     `5382`,
+			pairs:       []EquivalentPair{{"CJK RADICAL CLIFF", "⺁", "厂"}},
 		},
 		{
-			variant: `2FD3`,
-			unified: `9F8D`,
-			pairs:   []EquivalentPair{{"⿓", "龍"}},
+			variantName: "KANGXI RADICAL DRAGON",
+			variant:     `2FD3`,
+			unified:     `9F8D`,
+			pairs:       []EquivalentPair{{"KANGXI RADICAL DRAGON", "⿓", "龍"}},
 		},
 		{
-			variant: `2EBE..2EC0`,
-			unified: `8279`,
-			pairs:   []EquivalentPair{{"⺾", "艹"}, {"⺿", "艹"}, {"⻀", "艹"}},
+			variantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE",
+			variant:     `2EBE..2EC0`,
+			unified:     `8279`,
+			pairs: []EquivalentPair{
+				{"[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE", "⺾", "艹"},
+				{"[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE", "⺿", "艹"},
+				{"[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE", "⻀", "艹"},
+			},
 		},
 		{
-			variant: `31E1`,
-			unified: `2010E`,
-			pairs:   []EquivalentPair{{"㇡", "𠄎"}},
+			variantName: "CJK STROKE HZZZG",
+			variant:     `31E1`,
+			unified:     `2010E`,
+			pairs:       []EquivalentPair{{"CJK STROKE HZZZG", "㇡", "𠄎"}},
 		},
 	}
 
 	for _, c := range tt {
-		pairs, err := pairsFromTargets(c.variant, c.unified)
+		pairs, err := pairsFromTargets(c.variant, c.unified, c.variantName)
 		require.Equal(t, c.pairs, pairs)
 		require.NoError(t, err)
 	}
