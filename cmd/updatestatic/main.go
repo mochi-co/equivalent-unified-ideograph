@@ -18,21 +18,21 @@ import (
 	eqi "github.com/mochi-co/equivalent-unified-ideograph"
 )
 
+var (
+	index  *string
+	output *string
+)
+
 func init() {
 	index = flag.String("index", "data/EquivalentUnifiedIdeograph.txt", "the latest version of EquivalentUnifiedIdeograph.txt")
 	output = flag.String("output", "static.go", "the static go file containing the equivalent pairs")
 	flag.Parse()
 }
 
-var (
-	index  *string
-	output *string
-)
-
 func main() {
 	file, err := os.Open(*index)
 	if err != nil {
-		log.Fatalln("Couldn't open the index file", err)
+		log.Fatalln("couldn't open the index file", err)
 	}
 
 	pairs, err := eqi.ExtractPairs(file)
@@ -42,7 +42,9 @@ func main() {
 
 	d := `package eqi 
 
-var Pairs = ` + repr.String(pairs)
+var Pairs = ` + repr.String(pairs) + `
+
+var MappedPairs = ` + repr.String(eqi.MapPairs(pairs))
 
 	d = strings.Replace(d, "eqi.", "", -1)
 	err = ioutil.WriteFile(*output, []byte(d), 0644)
@@ -50,5 +52,5 @@ var Pairs = ` + repr.String(pairs)
 		log.Fatalln(err)
 	}
 
-	log.Printf("Sucessfully updated %s with data from %s", *output, *index)
+	log.Printf("sucessfully updated %s with data from %s", *output, *index)
 }
