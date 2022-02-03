@@ -12,8 +12,9 @@ import (
 // a variant (eg. CHK Radical, CJK Stroke, or Kangxi Radical) and its
 // Unified CJK equivalent.
 type EquivalentPair struct {
-	Variant string
-	Unified string
+	VariantName string
+	Variant     string
+	Unified     string
 }
 
 // ExtractPairs extracts the unicode pairs from an io.Reader to a properly
@@ -32,8 +33,8 @@ func ExtractPairs(r io.Reader) (pairs []EquivalentPair, err error) {
 			continue
 		}
 
-		variant, unified := targetsFromLine(line)
-		extracted, err := pairsFromTargets(variant, unified)
+		variant, unified, variantName := targetsFromLine(line)
+		extracted, err := pairsFromTargets(variant, unified, variantName)
 		if err != nil {
 			return pairs, err
 		}
@@ -45,9 +46,9 @@ func ExtractPairs(r io.Reader) (pairs []EquivalentPair, err error) {
 }
 
 // targetsFromLine extracts a pair of unicode targets from an index line.
-
-func targetsFromLine(line string) (variant, unified string) {
+func targetsFromLine(line string) (variant, unified, variantName string) {
 	codePoints := strings.Split(line, "#")
+	variantName = strings.TrimSpace(codePoints[1])
 	targets := strings.Split(codePoints[0], ";")
 	variant = strings.TrimSpace(targets[0])
 	unified = strings.TrimSpace(targets[1])
@@ -75,7 +76,7 @@ func hexToChar(hex string) (char string, err error) {
 // pairsFromTargets returns a slice of equivalent pairs from a target string.
 // If the target specifies a range (eg. xxxx..xxxx), multiple pairs covering
 // this range will be returned.
-func pairsFromTargets(variant, unified string) (pairs []EquivalentPair, err error) {
+func pairsFromTargets(variant, unified, variantName string) (pairs []EquivalentPair, err error) {
 	pairs = []EquivalentPair{}
 	variants := []string{}
 	if strings.Contains(variant, "..") {
@@ -112,8 +113,9 @@ func pairsFromTargets(variant, unified string) (pairs []EquivalentPair, err erro
 		}
 
 		pairs = append(pairs, EquivalentPair{
-			Variant: variantChar,
-			Unified: unifiedChar,
+			VariantName: variantName,
+			Variant:     variantChar,
+			Unified:     unifiedChar,
 		})
 	}
 
