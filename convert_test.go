@@ -7,6 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestBufferedReplace(t *testing.T) {
+	b := strings.NewReader(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`)
+	o, err := BufferedReplace(b)
+	require.NoError(t, err)
+	require.Equal(t, `a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉`, string(o.Bytes()))
+}
+
+func TestReplace(t *testing.T) {
+	o := Replace(`a⺁b⺄c⺅d⺆e⺇f⺩g⺫h⺭i⺶j⺼`)
+	require.Equal(t, `a厂b乙c亻d冂e𠘨f王g目h礻i羊j肉`, string(o))
+}
+
 func TestExtractPairs(t *testing.T) {
 	b := strings.NewReader(`
 	# invalid line followed by blank line
@@ -162,4 +174,29 @@ func TestHexToCode(t *testing.T) {
 func TestHexToCodeError(t *testing.T) {
 	_, err := hexToChar("abcdefg")
 	require.Error(t, err)
+}
+
+func TestMapPairs(t *testing.T) {
+	pairs := []EquivalentPair{
+		{Variant: "⺁", Unified: "厂", VariantName: "CJK RADICAL CLIFF"},
+		{Variant: "⺂", Unified: "乛", VariantName: "CJK RADICAL SECOND ONE"},
+		{Variant: "⻌", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⻍", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⻎", Unified: "辶", VariantName: "[3] CJK RADICAL SIMPLIFIED WALK..CJK RADICAL WALK TWO"},
+		{Variant: "⺃", Unified: "乚", VariantName: "CJK RADICAL SECOND TWO"},
+		{Variant: "⺾", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "⺿", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "⻀", Unified: "艹", VariantName: "[3] CJK RADICAL GRASS ONE..CJK RADICAL GRASS THREE"},
+		{Variant: "㇡", Unified: "𠄎", VariantName: "CJK STROKE HZZZG"},
+	}
+
+	m := MapPairs(pairs)
+
+	for _, v := range pairs {
+		require.Contains(t, m, v.Variant)
+	}
+
+	require.Equal(t, len(pairs), len(m))
+	require.Equal(t, m["⺂"], "乛")
+	require.Equal(t, m["㇡"], "𠄎")
 }
